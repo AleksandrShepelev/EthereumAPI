@@ -461,15 +461,15 @@ func EthNewFilter(filterOptions *FilterOptions) (int64, error) {
 }
 
 //TODO: test
-func EthNewBlockFilter() (int64, error) {
+func EthNewBlockFilter() (string, error) {
 	resp, err := Call("eth_newBlockFilter", nil)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	if resp.Error != nil {
-		return 0, fmt.Errorf(resp.Error.Message)
+		return "", fmt.Errorf(resp.Error.Message)
 	}
-	return ParseQuantity(resp.Result.(string))
+	return resp.Result.(string), nil
 }
 
 //TODO: test
@@ -497,7 +497,7 @@ func EthUninstallFilter(filterID string) (bool, error) {
 }
 
 //TODO: test
-func EthGetFilterChanges(filterID string) (*LogObject, error) {
+func EthGetBlockFilterChanges(filterID string) ([]string, error) {
 	resp, err := Call("eth_getFilterChanges", []interface{}{filterID})
 	if err != nil {
 		return nil, err
@@ -505,10 +505,12 @@ func EthGetFilterChanges(filterID string) (*LogObject, error) {
 	if resp.Error != nil {
 		return nil, fmt.Errorf(resp.Error.Message)
 	}
-	answer := new(LogObject)
-	err = MapToObject(resp.Result, answer)
-	if err != nil {
-		return nil, err
+	var rawAnswer []interface{}
+	rawAnswer = resp.Result.([]interface{})
+	answer := make([]string, len(rawAnswer))
+
+	for i, item := range rawAnswer {
+		answer[i] = item.(string)
 	}
 	return answer, nil
 }
