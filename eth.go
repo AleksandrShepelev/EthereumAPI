@@ -533,6 +533,25 @@ func EthGetFilterLogs(filterID string) (*LogObject, error) {
 }
 
 //TODO: test
+func EthGetBlockFilterLogs(filterID string) ([]string, error) {
+	resp, err := Call("eth_getFilterLogs", []interface{}{filterID})
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != nil {
+		return nil, fmt.Errorf(resp.Error.Message)
+	}
+	var rawAnswer []interface{}
+	rawAnswer = resp.Result.([]interface{})
+	answer := make([]string, len(rawAnswer))
+
+	for i, item := range rawAnswer {
+		answer[i] = item.(string)
+	}
+	return answer, nil
+}
+
+//TODO: test
 func EthGetLogs(filter []*FilterOptions) (*LogObject, error) {
 	resp, err := Call("eth_getLogs", filter)
 	if err != nil {
